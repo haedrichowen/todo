@@ -1,0 +1,184 @@
+html {
+    background-color: rgb(71,69,56,0.9);
+}
+
+body {
+    margin: 0 25%;
+    padding: 0;
+}
+
+div {
+	position: relative;
+	width: 100%;
+	min-height: 48px;
+}
+
+* {
+    font-family: serif;
+    box-sizing: border-box;
+    transition: height .33s linear;
+}
+
+.behind-all {
+    position: absolute; /* or fixed, depending on your layout */
+    padding: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 150%;
+    z-index: -2; /* or any negative value */
+}
+
+.routine_list {
+    position: static;
+    top: 0;
+    padding: 0;
+    margin-top: 33px;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 720px;
+    border-color: #325239;
+    border-style: outset;
+}
+  
+.verticalSpace {
+	min-height: 0;
+	background-color: rgb(56, 125, 76);
+	padding: 8px;
+	z-index: -1;
+}
+
+.listDiv {
+    background-color: rgb(21, 111, 52);
+    min-height: 720px;
+}
+
+/* Remove margins and padding from the list */
+ol {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  border-style: solid none none none;
+  border-color: #6f6a64;
+  border-width: 6px;
+  align-content: left;
+  list-style-position: inside;
+  list-style-type: upper-roman;
+}
+
+/* Style the list items */
+li {
+  transition: height 0.33s, background-color 0.33s, color 0.1s;
+  position: relative;
+  padding: 12px 8px;
+  background-color: #55544f;
+  font-size: 18px;
+  color: #eeeeee;
+  border-style: none none solid none;
+  border-color: #1f1919;
+  border-width: 4px;
+  height: 48px;
+}
+
+/* Style the close button */   
+.close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  max-height: 33px;
+  aspect-ratio: 1;
+  border-style: outset;
+  border-width: 2px;
+  border-color: #aaaaaa;
+  border-radius: 9%;
+}
+
+.finish {
+  background-color: #ff4151 !important;
+  border-color: #ee4151 !important;
+}
+
+.close:hover {
+  background-color: #44bf22;
+  border-color: #118b22;
+  color: white;
+}
+
+.routineDiv {
+    background-color: rgb(56, 125, 76);
+    padding: 5px 40px 0px 40px;
+    color: white;
+    text-align: left;
+}
+
+.routineInput {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    width: 75%;
+    padding: 10px;
+    float: left;
+    font-size: 16px;
+}
+
+button {
+    font-size: 18px;
+    border: none;
+    margin: 0px;
+    height: 100%;
+    padding: 12px;
+}
+
+.startButton {
+    padding: 10px;
+    width: 25%;
+    background: #d9d9d9;
+    color: #555;
+    float: left;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 0;
+}
+  
+.startButton:hover {
+    background-color: #99a999;
+}
+
+.hidden {
+	display: none;
+}
+
+.routine_info_options {
+    font-size: 12px;
+	min-height: 24px;
+	padding-bottom: 10px;
+	width: 100%;
+}
+
+.options_button {
+	width: 70%;
+	float: right;
+	text-align: right;
+}
+
+h2 {
+    margin: 0;
+  }
+  
+.header {
+    margin-top: 0;
+    background-color: rgb(56, 125, 76);
+    padding: 32px 40px 0px 40px;
+    color: white;
+    text-align: center;
+}
+
+.header_redirect {
+    background-color: rgb(56, 125, 76);
+    padding: 0px 40px 0px 40px;
+    color: white;
+    text-align: center;
+  }

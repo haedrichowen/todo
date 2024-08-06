@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ocean Animation</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #6c6494, #0e1a37, #061111);
+  }
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+  .countdown-bar {
+    position: absolute;
+    width: 80%;
+    height: 5px; /* Quarter of the screen height */
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .progress {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #FF9800, #FF5722); /* Gradient color */
+    border-radius: 10px;
+    transition: width 1s linear;
+  }
+  #countdown {
+    top: 23%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #countdown2 {
+    top: 23%;
+    left: 50%;
+    transform: translateX(-50%) scaleX(-1); /* Mirror horizontally */
+  }
+  .break-text-container {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    color: white;
+    text-align: center;
+  }
+  .letter {
+    display: inline-block;
+    animation: bounce 4s infinite; /* Adjusted animation duration */
+    transform: scaleX(1.1); /* Stretch horizontally by 10% */
+  }
+  .cloud-container, .bird-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+.cloud {
+    scale: 121%;
+    color: white;
+    opacity: 0.8;
+    position: absolute;
+    z-index: 2;
+}
+.bird {
+    opacity: 100%;
+    scale: (165%, 151%);
+    font-weight: 900;
+    color: rgb(210,200,200) !important;
+    position: absolute;
+    z-index: 2;
+  }
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+  @keyframes floatClouds {
+    from {
+      transform: translateX(-20%); /* Start from off-screen left */
+    }
+    to {
+      transform: translateX(20%); /* Move off-screen right */
+    }
+  }
+  @keyframes floatBirds {
+    from {
+      transform: translateX(-10%); /* Start from off-screen left */
+    }
+    to {
+      transform: translateX(10%); /* Move off-screen right */
+    }
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div class="countdown-bar" id="countdown">
+  <div class="progress" id="progress"></div>
+</div>
+<div class="countdown-bar" id="countdown2">
+  <div class="progress" id="progress2"></div>
+</div>
+<div class="break-text-container" id="breakTextContainer">
+  <span class="letter" style="animation-delay: 0s">B</span>
+  <span class="letter" style="animation-delay: 0.1s">r</span>
+  <span class="letter" style="animation-delay: 0.2s">e</span>
+  <span class="letter" style="animation-delay: 0.3s">a</span>
+  <span class="letter" style="animation-delay: 0.4s">k</span>
+  <span class="letter" style="animation-delay: 0.5s"> </span>
+  <span class="letter" style="animation-delay: 0.6s">U</span>
+  <span class="letter" style="animation-delay: 0.7s">n</span>
+  <span class="letter" style="animation-delay: 0.8s">d</span>
+  <span class="letter" style="animation-delay: 0.9s">e</span>
+  <span class="letter" style="animation-delay: 1s">r</span>
+  <span class="letter" style="animation-delay: 1.1s">w</span>
+  <span class="letter" style="animation-delay: 1.2s">a</span>
+  <span class="letter" style="animation-delay: 1.3s">y</span>
+  <span class="letter" style="animation-delay: 1.4s">.</span>
+  <span class="letter" style="animation-delay: 1.5s">.</span>
+  <span class="letter" style="animation-delay: 1.6s">.</span>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+<script>
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const noise = new SimplexNoise();
+  let time = 0;
+  let waveOffsetX = 0;
+  let waveOffsetY = 0;
+  let countdownLength = parseInt("<%= break_minutes %>") * 60; // Countdown length in seconds
+  let countdownPosition = countdownLength
+  let countdownTimer;
+
+  function getColor(waveValue, waveHeight) {
+    const colors = ['#0D47A1', '#1976D2', '#64B5F6', '#B3E5FC', '#FFFFFF', '#FFEB3B', '#FFC107', '#FF9800'];
+    const index = Math.floor((waveValue + waveHeight) / (2 * waveHeight / (colors.length - 1)));
+    return colors[index];
+  }
+
+  function drawOcean() {
+    const gridSize = 10;
+    const waveHeight = 40;
+    const majorWaveAmplitude = 20;
+    const majorWaveFrequency = 0.005;
+    const noiseScale = 0.005;
+    const offsetX = waveOffsetX - (canvas.width / 2);
+    const offsetY = waveOffsetY - (canvas.height / 2);
+
+    for (let x = canvas.width; x >= 0; x -= gridSize) {
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        const noiseValue = noise.noise2D((x - time * 50 + offsetX) * noiseScale, (y - offsetY) * noiseScale);
+        const wave = noiseValue * waveHeight;
+        const majorWavePhase = ((x + offsetX) / canvas.width) * 2 * Math.PI;
+        const majorWave = Math.sin(time * majorWaveFrequency + majorWavePhase) * majorWaveAmplitude;
+
+        ctx.beginPath();
+        ctx.moveTo(x, y + canvas.height / 2 + wave + majorWave);
+        ctx.quadraticCurveTo(x - gridSize / 2, y + canvas.height / 2 + wave + 10 + majorWave, x - gridSize, y + canvas.height / 2 + wave + majorWave);
+        ctx.lineTo(x - gridSize, y + canvas.height / 2 + wave + gridSize + majorWave);
+        ctx.lineTo(x, y + canvas.height / 2 + wave + gridSize + majorWave);
+        ctx.closePath();
+
+        const color = getColor(wave, waveHeight);
+        ctx.fillStyle = color;
+        ctx.fill();
+      }
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawOcean();
+    time += 0.01;
+    moveElements();
+    requestAnimationFrame(animate);
+  }
+
+  function setCanvasSize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  // Set canvas size initially
+  setCanvasSize();
+
+  // Start animation when everything is loaded
+  window.addEventListener('load', function () {
+    animate();
+    startCountdown();
+    createClouds();
+    createBirds();
+  });
+
+  // Start countdown
+  function startCountdown() {
+    countdownTimer = setInterval(updateCountdown, 1000);
+  }
+
+  // Update countdown display
+  function updateCountdown() {
+    const progress = document.getElementById('progress');
+    const percent = (countdownPosition/countdownLength) * 100;
+    progress.style.width = `${percent}%`;
+
+    const progress2 = document.getElementById('progress2');
+    progress2.style.width = `${percent}%`;
+
+    if (countdownPosition === 0) {
+      clearInterval(countdownTimer);
+      progress.style.width = '0';
+      progress2.style.width = '0';
+      document.getElementById('breakTextContainer').textContent = 'Break Complete';
+    } else {
+      countdownPosition--;
+    }
+  }
+function createElements(elementType, containerClass, elementClass, elementHTML, numElements, topRange, leftRange, animationDurationRange, speed, opacityRange) {
+    const container = document.createElement('div');
+    container.classList.add(containerClass);
+
+    for (let i = 0; i < numElements; i++) {
+        const element = document.createElement('span');
+        element.innerHTML = elementHTML;
+        element.classList.add(elementClass);
+        element.style.top = `${Math.random() * topRange + 10}%`;
+        element.style.left = `${Math.random() * leftRange}%`; // Randomize horizontal position
+        element.style.animationDuration = `${Math.random() * animationDurationRange + 50}s`;
+        element.style.color = `rgba(255, 255, 255, ${Math.random() * opacityRange + 0.4})`; // Randomize opacity
+        container.appendChild(element);
+    }
+
+    document.body.appendChild(container);
+}
+
+function moveElements(elementClass, speed, leftLimit) {
+    const elements = document.querySelectorAll('.' + elementClass);
+    elements.forEach(element => {
+        const currentPosition = parseFloat(element.style.left) || 0;
+        const newPosition = currentPosition + speed;
+        element.style.left = newPosition + 'vw';
+        if (newPosition > leftLimit) {
+            element.style.left = '-' + leftLimit + '%';
+        }
+    });
+}
+
+// Example usage for clouds
+createElements('span', 'cloud-container', 'cloud', `
+<pre>
+  //\\_//\\
+  (  o.o )
+ >   ^  <
+</pre>
+`, 5, 50, 100, 120, 0.1, 0.5);
+
+// Example usage for birds
+createElements('span', 'bird-container', 'bird', `
+<pre>
+      ___
+ ____/   \\___
+(           o >
+ \\_________/
+</pre>
+`, 3, 30, 100, 50, 0.2, 0.5);
+
+// Example usage for birds
+createElements('span', 'dog-container', 'bird', `
+<pre>
+           __
+*\_ ______/ V'-,
+   }        /~~'
+  /_)^ --,r'
+/b     /b
+
+</pre>
+`, 3, 30, 100, 50, 0.2, 0.5);
+
+// Example usage to move elements
+setInterval(() => {
+    moveElements('cloud', 0.7, 120);
+    moveElements('bird', 0.3, 100);
+}, 30);
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+
+<html>
+
+    <meta name="color-scheme" content="light only">
+    <link rel="stylesheet" type="text/css" href="archive.css"></link>
+
+    <head></head>
+
+    <body>
+        <div class="archive_list">
+            <form class='header_redirect' action="/" method="GET">
+                <button class="header">
+                    <h2> archive </h2>
+                </button>
+            </form>	
+            <div class='verticalSpace'></div>
+            <div class="searchDiv">
+                <div>
+                    <input type="text" class="searchInput" name="search_text" placeholder="Search the archive..." required>
+                    <button type="submit" class="searchButton">Search</button>
+                </div>
+                <div class="archive_info_options">
+                    <span id='options' class='options_button' onmouseenter="hoverHold(document.getElementById('options'), function() { document.getElementById('options').click() }, 400);" onclick="toggleClass('options')"> 
+                        options 
+                    </span>
+                </div>
+                <div class='options hidden' onclick="toggleClass('options')"> 
+                </div>
+            </div>
+            <div class='listDiv'>
+            </div>
+        </div>
+    <script>
+        function toggleClass(toggleclass) {
+            var toToggle = $('.' + toggleclass);
+                toToggle.each(function( index ) {
+                if ($(this).hasClass('hidden')) {
+                    $(this).removeClass('hidden');
+                } else {
+                    $(this).addClass('hidden');
+                }
+            });
+        }
+        </script>
+    </body>
+</html>
+

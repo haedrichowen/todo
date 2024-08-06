@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OceanAnimation</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #0d47a1, #2196f3);
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const noise = new SimplexNoise();
+    let time = 0;
+
+    function getColor(waveValue, waveHeight) {
+      const colors = ['#0D47A1', '#1976D2', '#64B5F6', '#B3E5FC', '#FFFFFF', '#FFEB3B', '#FFC107', '#FF9800'];
+      const index = Math.floor((waveValue + waveHeight) / (2 * waveHeight / (colors.length - 1)));
+      return colors[index];
+    }
+
+    function drawOcean() {
+      const gridSize = 10;
+      const waveHeight = 40;
+      const majorWaveAmplitude = 20;
+      const majorWaveFrequency = 0.005;
+      const noiseScale = 0.005;
+      ctx.beginPath();
+      for (let x = canvas.width; x >= 0; x -= gridSize) {
+        for (let y = 0; y < canvas.height; y += gridSize) {
+          const noiseValue = noise.noise2D((x - time * 50) * noiseScale, y * noiseScale);
+          const wave = noiseValue * waveHeight;
+          const majorWavePhase = ((x) / canvas.width) * 2 * Math.PI;
+          const majorWave = Math.sin(time * majorWaveFrequency + majorWavePhase) * majorWaveAmplitude;
+          ctx.moveTo(x, y + canvas.height / 2 + wave + majorWave);
+          ctx.quadraticCurveTo(x - gridSize / 2, y + canvas.height / 2 + wave + 10 + majorWave, x - gridSize, y + canvas.height / 2 + wave + majorWave);
+          ctx.lineTo(x - gridSize, y + canvas.height / 2 + wave + gridSize + majorWave);
+          ctx.lineTo(x, y + canvas.height / 2 + wave + gridSize + majorWave);
+        }
+      }
+      ctx.closePath();
+      ctx.fillStyle = '#64B5F6'; // Use a fixed color for now
+      ctx.fill();
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawOcean();
+      time += 0.01;
+      requestAnimationFrame(animate);
+    }
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    animate();
+
+    window.addEventListener('resize', function () {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>

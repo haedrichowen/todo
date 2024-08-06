@@ -1,0 +1,658 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<meta name="color-scheme" content="light only">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+<link rel="stylesheet" type="text/css" href="main.css"></link>
+
+<head>
+<script src="./jquery-3.7.1.slim.js"></script>
+<script>
+	function buttonHold(element, action_function, hold_time_ms) {
+		const test_execute = function() { if (element.matches(':hover')){ action_function(); }};
+		setTimeout(test_execute, hold_time_ms)
+	}
+        function hoverHold(element, action_function, hold_time_ms) {
+                const test_execute = function() { if (element.matches(':hover')){ action_function(); }};
+                setTimeout(test_execute, hold_time_ms)
+        }
+</script>
+<script>
+    // Function to smoothly scroll to 5% of the top
+    function smoothScrollTo5Percent() {
+        window.scroll({
+            top: window.innerHeight * 0.05, // 5% of the viewport height
+            behavior: 'smooth' // Smooth scrolling
+        });
+    }
+
+    // Check if scroll position is within 15% of the top
+    window.addEventListener('DOMContentLoaded', function() {
+        var scrollPosition = window.scrollY;
+        var windowHeight = window.innerHeight;
+        var percentOfWindow = windowHeight * 0.25;
+
+        if (scrollPosition < percentOfWindow) {
+            // Call smooth scroll function
+            smoothScrollTo5Percent();
+        }
+    });
+function postToBlockLength(newBlValue) {
+  const url = `/blockLength/${newBlValue}`;
+  fetch(url, {
+    method: 'POST',
+  }).then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    // Handle success
+    console.log('Blocks saved successfully');
+;})
+.catch(error => {
+    // Handle errors
+    console.error('Error saving blocks:', error);
+});
+}
+</script>
+<script>
+// Function to save notes to server
+function saveNotes() {
+// Select all elements with class 'note'
+    var noteElements = document.querySelectorAll('.note');
+
+    // Create a container element to hold all the notes
+    var container = document.createElement('div');
+
+    // Iterate through each note element and append it to the container
+    Array.from(noteElements).forEach(function(noteElement) {
+        // Clone the note element
+        var clonedNote = noteElement.cloneNode(true);
+
+        // Get the computed style of the note element
+        var computedStyle = window.getComputedStyle(noteElement);
+
+        // Create a style element and set its content to the computed style
+        var styleElement = document.createElement('style');
+        styleElement.innerHTML = '.note { ' + computedStyle.cssText + ' }';
+
+        // Append the cloned note and style element to the container
+        container.appendChild(styleElement);
+        container.appendChild(clonedNote);
+    });
+
+    // Get the HTML content of the container
+    var notesHTML = encodeURIComponent(container.innerHTML);console.log("saving notes: " + notesHTML);
+
+// Send data to server
+fetch('/saveNotes', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'text/html' // Set the content type to text/html
+    },
+    body: notesHTML
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    // Handle success
+    console.log('Notes saved successfully');
+})
+.catch(error => {
+    // Handle errors
+    console.error('Error saving notes:', error);
+});
+}
+
+</script>
+</head>
+
+<body>
+<span id="blank-space" class="blank-space" onclick="spawnTextBox(event)"></span>
+<span id="main" class="main">
+<div class="todo_list">
+	<form class='header_redirect' action="/routine/" method="GET">
+		<button class="header">
+			<h2> todo </h2>
+		</button>
+	</form>	
+	<div class='verticalSpace'></div>
+	<div class='plan_a_day'>
+	<form action="/add/todo" method="POST">
+	<div>
+		<input type="text" class='todoInput' name="text" placeholder="Add a todo..." required>
+		<input type="hidden" id="todo_datetime" name="starttime" value="0"> <!-- value = minutes_from_now -->  
+		<input type="hidden" id="todo_length" name="length" value="<%= block_length %>"> 
+		<button type="submit" class="addButton">Add</button>
+	</div>
+	<div class='input_info options'> 
+		<span> start time: <%= strftime(' %-I:%M %P', new Date(nearest_free_time)) %> </span>
+		<span id='options' class='options_button' onmouseenter="hoverHold(document.getElementById('options'), function() { document.getElementById('options').click() }, 133);" onclick="toggleClass('options')"> options </span>
+	</div>
+	<div class='options hidden'>
+		<div onclick="toggleClass('options')"> 
+                <button type='button' class='headerButton'> Plan your day: </button>
+		<hr>
+		<div class='verticalSpace'></div>
+		</div>		
+		<div>	
+		<span class='floatingLeft' text-align='left'> sᴛᴀʀᴛ ᴛɪᴍᴇ: </span>
+			<span class='floatingRight'> 
+			<span position='absolute'></span>
+					<span> ʙʟᴏᴄᴋ ʟᴇɴɢᴛʜ: <br> 
+					<span> − <span class="invisibleButton left" onclick="incrementBlockLength(-15)"></span> </span>
+					<span id="blockLength"> <%= block_length + ' min' %> </span>
+					<span> + <span class="invisibleButton right" onclick="incrementBlockLength(15)"></span> </span> 
+			</span>
+			<span position='absolute'></span> 
+		</span>
+		<%
+       		const time_block_ms = 1000 * 60 * block_length;
+        	var time_slots = {};
+        	const now = new Date(Date.now());
+        	var time_slots = [];
+        	var hr = 0;
+        	var min = 0;
+        	var i = 1;
+        	while (i < 55) {
+               		var later_time_ms = Date.now() + i*time_block_ms;
+       		        var later_time_ms = Math.round(later_time_ms/time_block_ms) * time_block_ms;
+        	      	var later_time = new Date(later_time_ms);
+         	      	time_slots.push(later_time);
+          	     	min = later_time.getMinutes();
+          	     	hr = later_time.getHours();
+               		i++;
+       		}
+		%>
+		<div class='timeButtonDiv'>
+			<span>
+				<script> function todayToggled() { if ($('#today').classList.contains("toggled")) { return true; } return false; } </script>
+					<button type='button' onclick='toggle(this)' class='time toggled' time_block="<%= 0*block_length %>" script='if todayToggled() {}'>Now</button>
+				<% for (var i=0; i<time_slots.length; i++) {  %>
+					<button type='button' onclick='toggle(this)' class='time slide_item' time_block="<%= (i+1)*block_length %>"> 
+						<% var button_text %> 
+						<% button_text = strftime('%-I:%M %P', time_slots[i]); %>
+						<%= button_text %>
+					</button>
+				<% } %>
+			</span>
+		</div>
+		</div>
+
+		<div class='verticalSpace'></div>
+		<div class='week hidden'>
+                <div class='verticalSpace'></div>
+		<div class='dayButtonDiv' class='gradientFade'>
+                        <button type='button' id='today' onclick='toggle(this)' class='date toggled' days_from_today='0'> Today </button>
+                        <button type='button' onclick='toggle(this)' class='date' days_from_today='1'> Tomorrow </button>
+                        <% const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]; %>
+                        <% const today = new Date().getDay(); %>
+                        <% var days_from_today = 2; %>
+                        <% for (var futuresight=0; futuresight<2; futuresight++) { %>
+                        <%      for (var i=2; i<days.length; i++) { %>
+                        <%              var j = today + i %>
+                        <%              if (j + 1 > days.length) { %>
+                        <%                      j -= days.length; %>
+                        <%              } %>
+                                        <button days_from_today="<%=days_from_today%>" type='button' onclick='toggle(this)' class='date'> <%= days[i] %> </button>
+                        <%              days_from_today += 1; %>
+                        <%      } %>
+                        <% } %>
+                </div>
+		</div>
+	</div>
+	</div>
+	</form>	
+    <!-- Generate List of Todos -->
+	<div class='listDiv'>
+		<ol>
+		<% for(var i=0; i<Object.keys(todo_array).length; i++) { %>
+			<li>
+			<span class="<%= 'todoText '  + todo_array[i].id %>"> </span> <%= todo_array[i].todo %>
+               		<span ms_since_epoch="<%= todo_array[i].datetime %>" todo_length="<%= todo_array[i].length %>"class="<%='todoTimer '  + todo_array[i].id %>"> </span>
+			<form action="/remove/todo/<%= i+1 %>" method="POST">
+				<button id="close_button<%= i %>" class="close" 
+				onmouseenter="$(this).removeClass('finish');"
+				onmouseleave="$(this).removeClass('finish');"
+				onmousedown="buttonHold(document.querySelector('#close_button<%= i %>'), function() { $('#close_button<%= i %>').addClass('finish') }, 800);"> 
+				</button>
+			</form>
+			<div class="<%= 'todo' + todo_array[i].id + ' todoInfo' %>">
+				<hr>
+				<% var start_ms = parseInt(todo_array[i].datetime); %>
+				<% var start_datetime = strftime('%B %d, %I:%M %p', new Date(start_ms)) %>
+				<span class='todoStartTime'> start time: <%= start_datetime %> </span>
+			</div>
+			</li>
+		<% } %>
+		<div class='allDone'>
+		<% if (todo_array.length == 0) { %>
+			<span> all done? </span>
+			<span class='takeBreak'>
+				<div class='breakSelector'>
+				<div class='breakLength'>
+				 	ᴛᴀᴋᴇ ᴀ ʙʀᴇᴀᴋ <br>
+					<span id="breakLength"></span>
+				</div>
+				<span class="invisibleButton top" onclick=" window.location.href = 'break/' + breakLength.toString()"></span> 
+				<span class="invisibleButton left" onclick="incrementBreakLength(-5)"></span> 
+				<span class="invisibleButton right" onclick="incrementBreakLength(5)"></span>
+				</div>
+				<button class="breakButton"></button>
+			</span>
+		<% } else { %>
+			<span> end </span>
+		<% } %>
+		</div>
+		</ol>
+	</div>
+</div>
+<script>
+	// Instantiate breakLength from ejs
+	var breakLength = parseInt("<%= break_length %>");
+    // Get the span element by its ID
+    var spanElement = document.getElementById("breakLength");
+    
+    // Change the text inside the span
+    spanElement.innerHTML = '− ' + breakLength + ' mins +' ;
+</script>
+<script>
+	var block_length = parseInt("<%= block_length %>");
+
+	function incrementBlockLength(inc) {
+                if (block_length + inc < -inc && inc < 0) {
+                        if (block_length <= 5) { block_length = 'no time'; }                 
+                        if (block_length == 10) { block_length = 5; }                 
+                        if (block_length == Math.abs(inc)) { block_length = 10; }
+                } else {
+                        if (typeof(block_length) == 'number') {
+    			        	block_length += inc;
+	    			        block_length = Math.floor(block_length/inc) * inc;
+			            }
+                }
+        if (typeof(block_length) == 'number'){
+		    $('#blockLength').text(block_length + ' mins');
+        } else {
+            $('#blockLength').text(block_length);
+            block_length = 3; //set block length to 3 minutes if it's not a number
+        }
+        $('#todo_length').attr("value", block_length);
+		postToBlockLength(block_length);
+		redrawTimeButtons();
+		refreshTimeButtons();
+	}
+</script>
+<script>
+    // Function to refresh the time buttons on the user's screen
+    function refreshTimeButtons() {
+        var timeButtonDiv = document.querySelector('.timeButtonDiv');
+        var parent = timeButtonDiv.parentElement;
+        parent.removeChild(timeButtonDiv); // Remove the timeButtonDiv
+
+        // Re-create timeButtonDiv
+        var newTimeButtonDiv = document.createElement('div');
+        newTimeButtonDiv.className = 'timeButtonDiv';
+        parent.appendChild(newTimeButtonDiv);
+
+        redrawTimeButtons(); // Call the redraw function to update the time buttons
+    }
+</script>
+
+<script>
+	function incrementBreakLength(inc) {
+		if (breakLength + inc < Math.abs(inc) && inc < 0) {
+			if (breakLength == Math.abs(inc)) { breakLength = 5; }
+			$('#breakLength').text('− ' + breakLength + ' mins +');
+			if (breakLength == 5) { }
+		} else {
+			breakLength += inc;
+			breakLength = Math.floor(breakLength/inc) * inc;
+			$('#breakLength').text('− ' + breakLength + ' mins +');
+		
+			if (breakLength > 60) {
+				breakLength = 60 + inc;				
+				$('#breakLength').text('Until Morning');
+			}
+		}
+
+	}
+</script>
+
+<script>
+  function toggle(element) {
+	if (element.classList.contains("date")) {$(".date").removeClass("toggled"); } 
+	if (element.classList.contains("time")) {$(".time").removeClass("toggled"); } 
+	element.classList.add('toggled');
+	document.getElementById('todo_datetime').value = parseInt($(".toggled.date").attr("days_from_today"))*24*60 + parseInt($(".toggled.time").attr("time_block"));
+  }
+</script>
+
+<script>
+        document.addEventListener("DOMContentLoaded", function(event) { 
+            var scrollpos = localStorage.getItem('scrollpos');
+            if (scrollpos) window.scrollTo(0, scrollpos);
+        });
+
+        window.onbeforeunload = function(e) {
+            localStorage.setItem('scrollpos', window.scrollY);
+        };
+</script>
+
+<script>
+function toggleClass(toggleclass) {
+	var toToggle = $('.' + toggleclass);
+        toToggle.each(function( index ) {
+		if ($(this).hasClass('hidden')) {
+			$(this).removeClass('hidden');
+		} else {
+			$(this).addClass('hidden');
+		}
+	});
+}
+</script>
+
+<script>
+	function updateTodos() {
+		$('.todoTimer').each(
+			function updateTodoTimer(index, element) {
+				const today = new Date()
+				const tomorrow = new Date(today)
+				tomorrow.setDate(tomorrow.getDate() + 1)
+				var todo_start_time = parseInt($(this).attr('ms_since_epoch'));
+				var todo_length_in_ms = parseInt($(this).attr('todo_length')) * 60 * 1000;
+				var todo_end_time = todo_start_time + todo_length_in_ms
+
+				if (todo_start_time <= Date.now()) {
+					$(this).removeClass('future');
+					var new_time = todo_end_time - Date.now();
+					if (new_time >= 0){
+						$(this).text(msToCountdownString(new_time));
+					} else { 
+						new_time = 0 
+						$(this).text('overdue');
+					}
+				} else if (todo_start_time <= tomorrow.getTime()) {	
+					$(this).text(new Date(todo_start_time).toLocaleTimeString('en-US', {timeStyle: 'short'}));	
+				} else {
+					$(this).addClass('future');
+					$(this).text(new Date(todo_start_time).toLocaleDateString('en-us', { weekday:"long", month:"long", day:"numeric"}));
+				} 
+			}
+		);
+		setTimeout(updateTodos, 1000);
+	}
+
+	updateTodos();
+
+	function msToCountdownString(time_in_ms) {		
+		var time_in_seconds = parseInt(time_in_ms/1000);
+		var minutes = Math.floor(time_in_seconds/60);
+		var seconds = time_in_seconds % 60;
+		if( seconds < 10 ) { seconds = "0" + seconds; }
+		return minutes + ":" + seconds
+	}
+
+	function msToTimeString(time_in_ms) {
+		var time_in_seconds = parseInt(time_in_ms/1000);
+		var hours = Math.floor(time_in_seconds/(60*60));
+		var minutes = Math.floor((time_in_seconds - hours*(60*60))%60);
+		return hours + ":" + minutes
+	}
+</script>
+
+<script>
+	const slider = document.querySelector('.slide_item');
+	let isDown = false;
+	let startX;
+	let scrollLeft;
+
+	slider.addEventListener('mousedown', (e) => {
+	  isDown = true;
+	  slider.classList.add('active');
+	  startX = e.pageX - slider.offsetLeft;
+	  scrollLeft = slider.scrollLeft;
+	});
+	slider.addEventListener('mouseleave', () => {
+	  isDown = false;
+	  slider.classList.remove('active');
+	});
+	slider.addEventListener('mouseup', () => {
+	  isDown = false;
+	  slider.classList.remove('active');
+	});
+	slider.addEventListener('mousemove', (e) => {
+	  if(!isDown) return;
+	  e.preventDefault();
+	  const x = e.pageX - slider.offsetLeft;
+	  const walk = (x - startX) * 3; //scroll-fast
+	  slider.scrollLeft = scrollLeft - walk;
+	  console.log(walk);
+	});
+</script>
+
+<script>
+
+function clickAndDragNote(note) {
+    let offsetX, offsetY;
+    let isDragging = false;
+    const moveButton = note.querySelector('.move-note');
+
+    // Store the initial position of the mouse relative to the note
+    moveButton.addEventListener("mousedown", function(event) {
+        saveNotes();
+	isDragging = true;
+        offsetX = event.clientX - parseInt(note.style.left);
+        offsetY = event.clientY - parseInt(note.style.top);
+    });
+
+    // Update the note position when dragging
+    document.addEventListener("mousemove", function(event) {
+        if (isDragging) {
+            note.style.left = (event.clientX - offsetX) + "px";
+            note.style.top = (event.clientY - offsetY) + "px";
+        }
+    });
+
+    // Stop dragging when mouse button is released
+    document.addEventListener("mouseup", function() {
+         saveNotes();
+	 isDragging = false;
+    });
+}
+
+function closeNoteAfterDelay(note) {
+    const holdTime = 500; // 0.5 second
+    let holdTimer;
+    let mouseMoved = false;
+
+    // Store initial mouse position
+    let initialX, initialY;
+    document.addEventListener("mousedown", function(event) {
+        initialX = event.clientX;
+        initialY = event.clientY;
+    });
+
+    const moveButton = note.querySelector('.move-note');
+
+    moveButton.addEventListener("mousedown", function(event) {
+        holdTimer = setTimeout(function() {
+            if (!mouseMoved) {
+                moveButton.classList.add('delete-note');
+            }
+        }, holdTime);
+
+        // Check for mouse movement
+        document.addEventListener("mousemove", function(event) {
+            if (event.clientX !== initialX || event.clientY !== initialY) {
+                mouseMoved = true;
+                moveButton.classList.remove('delete-note');
+            }
+        });
+    });
+
+    moveButton.addEventListener("mouseup", function() {
+        clearTimeout(holdTimer);
+        if (moveButton.classList.contains('delete-note')) {
+            note.parentNode.removeChild(note);
+        }
+        mouseMoved = false; // Reset mouse movement flag
+    });
+}
+
+function spawnTextBox(event) {
+    // Create a new text box element
+    const note = document.createElement("span");
+    const textBox = document.createElement("textarea");
+    const clickAndDragButton = document.createElement("button");
+
+    textBox.setAttribute("maxlength", "115"); // Set maximum character limit
+    textBox.addEventListener("keydown", function(e) {
+        if (e.keyCode === 13) { // If Enter key is pressed
+            e.preventDefault();
+            textBox.blur(); // Remove focus from the text box
+        }
+    });
+    textBox.addEventListener("blur", function() {
+        textBox.removeAttribute("contenteditable"); // Make the text box non-editable
+    });
+
+    // Set the position of the note
+    note.style.position = "absolute";
+    note.style.left = (event.clientX + window.pageXOffset) + "px";
+    note.style.top = (event.clientY + window.pageYOffset) + "px";
+    note.classList.add('note');
+    textBox.classList.add('note-text');
+    clickAndDragButton.classList.add('move-note');
+
+    // Append the button to the note before attaching event listeners
+    note.appendChild(textBox);
+    note.appendChild(clickAndDragButton);
+
+    // Append the note to the container
+    document.getElementById("blank-space").parentElement.appendChild(note);
+
+    // Focus on the text box for user input
+    textBox.focus();
+    saveNotes();
+    clickAndDragNote(note);
+    closeNoteAfterDelay(note);
+}
+window.onload = function() {
+	document.querySelectorAll('.note').forEach(note => {
+  	  clickAndDragNote(note);
+ 	  closeNoteAfterDelay(note);
+	});
+};
+
+</script>
+
+<script>
+    // Function to format time as hh:mm AM/PM
+    function formatTime(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // Handle midnight
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        var timeString = hours + ':' + minutes + ' ' + ampm;
+        return timeString;
+    }
+
+    // Function to redraw the time buttons based on the new block length
+    function redrawTimeButtons() {
+        const time_block_ms = 1000 * 60 * block_length;
+        var time_slots = [];
+        const now = new Date(Date.now());
+        var hr = 0;
+        var min = 0;
+        var i = 1;
+        while (i < 55) {
+            var later_time_ms = Date.now() + i * time_block_ms;
+            later_time_ms = Math.round(later_time_ms / time_block_ms) * time_block_ms;
+            var later_time = new Date(later_time_ms);
+            time_slots.push(later_time);
+            min = later_time.getMinutes();
+            hr = later_time.getHours();
+            i++;
+        }
+
+        // Clear the existing buttons
+        document.querySelector('.timeButtonDiv').innerHTML = '';
+
+        // Add new buttons
+        var timeButtonDiv = document.querySelector('.timeButtonDiv');
+        var span = document.createElement('span');
+
+        // Add 'Now' button
+        var nowButton = document.createElement('button');
+        nowButton.type = 'button';
+        nowButton.className = 'time toggled';
+        nowButton.setAttribute('time_block', '0');
+        nowButton.setAttribute('script', 'if (todayToggled()) {}');
+        nowButton.innerHTML = 'Now';
+        nowButton.onclick = function() {
+            toggle(this);
+        };
+        span.appendChild(nowButton);
+
+        // Add time slot buttons
+        for (var j = 0; j < time_slots.length; j++) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'time slide_item';
+            button.setAttribute('time_block', (j + 1) * block_length);
+            var button_text = formatTime(time_slots[j]);
+            button.innerHTML = button_text;
+            button.onclick = function() {
+                toggle(this);
+            };
+            span.appendChild(button);
+        }
+
+        timeButtonDiv.appendChild(span);
+    }
+
+    // Call the redraw function initially
+    redrawTimeButtons();
+
+    // Function to check if today is toggled
+    function todayToggled() {
+        if ($('#today').classList.contains("toggled")) {
+            return true;
+        }
+        return false;
+    }
+</script>
+</span> <!-- end of main -->
+<script>  document.getElementById("main").innerHTML += decodeURIComponent(`<%- notes %>`);</script>
+
+
+<div id="menu" class="menu">
+    <span>
+    <button id="closeMenu" class="menuButton">Close</button>
+    options
+    </span>
+</div>
+<button id="openMenu" class="menuButton">Controls</button>
+<script>
+const openMenuButton = document.getElementById('openMenu');
+const closeMenuButton = document.getElementById('closeMenu');
+const menu = document.getElementById('menu');
+
+openMenuButton.addEventListener('click', function() {
+  menu.style.left = '0';
+});
+
+closeMenuButton.addEventListener('click', function() {
+  menu.style.left = '-250px';
+});
+
+menu.style.left = '-250px';
+
+</script>
+</body>
+</html>

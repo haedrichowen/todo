@@ -1,0 +1,206 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<meta name="color-scheme" content="light only">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+<link rel="stylesheet" type="text/css" href="views/habits/habits.css"></link>
+
+<head>
+<!-- Load static scripts -->
+<script src="./scripts/jquery-3.7.1.slim.js"></script>
+<script src="./scripts/habits.js"></script>
+ <!-- Load EJS dependent scripts -->
+<script>
+	document.getElementById("main").innerHTML += decodeURIComponent(`<%- notes %>`);
+
+function todayToggled() { 
+    if ($('#today').classList.contains("toggled")) { return true; } return false; 
+}
+	// Instantiate breakLength from ejs
+	var breakLength = parseInt("<%= break_length %>");
+    // Get the span element by its ID
+    var spanElement = document.getElementById("breakLength");
+    
+    // Change the text inside the span
+    spanElement.innerHTML = '− ' + breakLength + ' mins +' ;
+
+	var block_length = parseInt("<%= block_length %>");
+
+	function incrementBlockLength(inc) {
+                if (block_length + inc < -inc && inc < 0) {
+                        if (block_length <= 5) { block_length = 'no time'; }                 
+                        if (block_length == 10) { block_length = 5; }                 
+                        if (block_length == Math.abs(inc)) { block_length = 10; }
+                } else {
+                        if (typeof(block_length) == 'number') {
+    			        	block_length += inc;
+	    			        block_length = Math.floor(block_length/inc) * inc;
+			            }
+                }
+        if (typeof(block_length) == 'number'){
+		    $('#blockLength').text(block_length + ' mins');
+        } else {
+            $('#blockLength').text(block_length);
+            block_length = 3; //set block length to 3 minutes if it's not a number
+        }
+        $('#habit_length').attr("value", block_length);
+		postToBlockLength(block_length);
+		redrawTimeButtons();
+		refreshTimeButtons();
+	}
+</script>
+</head>
+
+<body>
+<span id="blank-space" class="blank-space" onclick="spawnTextBox(event)"></span>
+<span id="main" class="main">
+<div class="habit_list">
+	<form class='header_redirect' action="/routine/" method="GET">
+		<button class="header">
+			<h2> habits </h2>
+		</button>
+	</form>	
+	<div class='verticalSpace'></div>
+	<div class='plan_a_day'>
+	<form action="/add/habit" method="POST">
+	<div>
+		<input type="text" class='habitInput' name="text" placeholder="Start a habit." required>
+		<input type="hidden" id="habit_datetime" name="starttime" value="0"> <!-- value = minutes_from_now -->  
+		<input type="hidden" id="habit_length" name="length" value="<%= block_length %>"> 
+		<button type="submit" class="addButton">Add</button>
+	</div>
+	<div class='input_info options'> 
+		<span> start time: <%= strftime(' %-I:%M %P', new Date(nearest_free_time)) %> </span>
+		<span id='options' class='options_button' onmouseenter="hoverHold(document.getElementById('options'), function() { document.getElementById('options').click() }, 199);" onclick="toggleClass('options')"> options </span>
+	</div>
+	<div class='options hidden'>
+		<div onclick="toggleClass('options')"> 
+                <button type='button' class='headerButton'> Plan your day: </button>
+		<hr>
+		<div class='verticalSpace'></div>
+		</div>		
+		<div>	
+		<span class='floatingLeft' text-align='left'> sᴛᴀʀᴛ ᴛɪᴍᴇ: </span>
+			<span class='floatingRight'> 
+			<span position='absolute'></span>
+					<span> ʙʟᴏᴄᴋ ʟᴇɴɢᴛʜ: <br> 
+					<span> − <span class="invisibleButton left" onclick="incrementBlockLength(-15)"></span> </span>
+					<span id="blockLength"> <%= block_length + ' min' %> </span>
+					<span> + <span class="invisibleButton right" onclick="incrementBlockLength(15)"></span> </span> 
+			</span>
+			<span position='absolute'></span> 
+		</span>
+		<%
+       		const time_block_ms = 1000 * 60 * block_length;
+        	var time_slots = {};
+        	const now = new Date(Date.now());
+        	var time_slots = [];
+        	var hr = 0;
+        	var min = 0;
+        	var i = 1;
+        	while (i < 55) {
+               		var later_time_ms = Date.now() + i*time_block_ms;
+       		        var later_time_ms = Math.round(later_time_ms/time_block_ms) * time_block_ms;
+        	      	var later_time = new Date(later_time_ms);
+         	      	time_slots.push(later_time);
+          	     	min = later_time.getMinutes();
+          	     	hr = later_time.getHours();
+               		i++;
+       		}
+		%>
+		<div class='timeButtonDiv'>
+			<span>
+                <button type='button' onclick='toggle(this)' class='time toggled' time_block="<%= 0*block_length %>" script='if todayToggled() {}'>Now</button>
+				<% for (var i=0; i<time_slots.length; i++) {  %>
+					<button type='button' onclick='toggle(this)' class='time slide_item' time_block="<%= (i+1)*block_length %>"> 
+						<% var button_text %> 
+						<% button_text = strftime('%-I:%M %P', time_slots[i]); %>
+						<%= button_text %>
+					</button>
+				<% } %>
+			</span>
+		</div>
+		</div>
+
+		<div class='verticalSpace'></div>
+		<div class='week hidden'>
+                <div class='verticalSpace'></div>
+		<div class='dayButtonDiv' class='gradientFade'>
+                        <button type='button' id='today' onclick='toggle(this)' class='date toggled' days_from_today='0'> Today </button>
+                        <button type='button' onclick='toggle(this)' class='date' days_from_today='1'> Tomorrow </button>
+                        <% const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]; %>
+                        <% const today = new Date().getDay(); %>
+                        <% var days_from_today = 2; %>
+                        <% for (var futuresight=0; futuresight<2; futuresight++) { %>
+                        <%      for (var i=2; i<days.length; i++) { %>
+                        <%              var j = today + i %>
+                        <%              if (j + 1 > days.length) { %>
+                        <%                      j -= days.length; %>
+                        <%              } %>
+                                        <button days_from_today="<%=days_from_today%>" type='button' onclick='toggle(this)' class='date'> <%= days[i] %> </button>
+                        <%              days_from_today += 1; %>
+                        <%      } %>
+                        <% } %>
+                </div>
+		</div>
+	</div>
+	</div>
+	</form>	
+    <!-- Generate List of habits -->
+	<div class='listDiv'>
+		<ol>
+		<% for(var i=0; i<Object.keys(habit_array).length; i++) { %>
+			<li>
+			<span class="<%= 'habitText '  + habit_array[i].id %>"> </span> <%= habit_array[i].habit %>
+			<form action="/remove/habit/<%= i+1 %>" method="POST">
+				<button id="close_button<%= i %>" class="close" 
+				onmouseenter="$(this).removeClass('finish');"
+				onmouseleave="$(this).removeClass('finish');"
+				onmousedown="buttonHold(document.querySelector('#close_button<%= i %>'), function() { $('#close_button<%= i %>').addClass('finish') }, 800);"> 
+				</button>
+			</form>
+			<div class="<%= 'habit' + habit_array[i].id + ' habitInfo' %>">
+				<hr>
+				<% var start_ms = parseInt(habit_array[i].datetime); %>
+				<% var start_datetime = strftime('%B %d, %I:%M %p', new Date(start_ms)) %>
+				<span class='habitStartTime'> start time: <%= start_datetime %> </span>			</div>
+			</li>
+		<% } %>
+		<div class='allDone'>
+		<% if (habit_array.length == 0) { %>
+			<span> all done? </span>
+			<span class='takeBreak'>
+				<div class='breakSelector'>
+				<div class='breakLength'>
+				 	ᴛᴀᴋᴇ ᴀ ʙʀᴇᴀᴋ <br>
+					<span id="breakLength"></span>
+				</div>
+				<span class="invisibleButton top" onclick=" window.location.href = 'break/' + breakLength.toString()"></span> 
+				<span class="invisibleButton left" onclick="incrementBreakLength(-5)"></span> 
+				<span class="invisibleButton right" onclick="incrementBreakLength(5)"></span>
+				</div>
+				<button class="breakButton"></button>
+			</span>
+		<% } else { %>
+			<span> end </span>
+		<% } %>
+		</div>
+		</ol>
+	</div>
+</div>
+
+</span> <!-- end of main -->
+
+<div id="menu" class="menu">
+    <span>
+    <button id="closeMenu" class="menuButton">Close</button>
+    options
+    </span>
+</div>
+<button id="openMenu" class="menuButton">Controls</button>
+
+</body>
+</html>

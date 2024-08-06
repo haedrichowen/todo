@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Animation</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #a6d5f5, #68a9e3); /* Gradient for sky */
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script>
+        // Animation Control Model (ACM)
+        const ACM = {
+            animationsLoaded: false,
+            targetFPS: 24, // Smooth 24 fps
+            frameDuration: 1000 / 24, // 24 fps
+            lastFrameTime: 0,
+            delta: 0
+        };
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const noise = new SimplexNoise();
+
+        let time = 0;
+
+        function loadAnimations() {
+            ACM.animationsLoaded = true;
+        }
+
+        function animate(timestamp) {
+            // Calculate delta time
+            ACM.delta += timestamp - ACM.lastFrameTime;
+            ACM.lastFrameTime = timestamp;
+
+            // Update as many frames as needed
+            while (ACM.delta >= ACM.frameDuration) {
+                update();
+                ACM.delta -= ACM.frameDuration;
+            }
+
+            // Render frame
+            render();
+
+            requestAnimationFrame(animate);
+        }
+
+        function update() {
+            time += 0.01;
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawOcean();
+        }
+
+        function drawOcean() {
+            const gridSize = 10;
+            const waveHeight = 60;
+            const waveSpeed = 0.05;
+            const oceanColor = "#68a9e3";
+            const foamColor = "#ffffff";
+
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                for (let y = 0; y < canvas.height; y += gridSize) {
+                    const noiseValue = noise.noise2D(x / 100, y / 100 + time * waveSpeed);
+                    const wave = noiseValue * waveHeight;
+
+                    ctx.beginPath();
+                    ctx.moveTo(x, y + canvas.height / 2 + wave);
+                    ctx.quadraticCurveTo(x + gridSize / 2, y + canvas.height / 2 + wave + 10, x + gridSize, y + canvas.height / 2 + wave);
+                    ctx.lineTo(x + gridSize, y + canvas.height / 2 + wave + gridSize);
+                    ctx.lineTo(x, y + canvas.height / 2 + wave + gridSize);
+                    ctx.closePath();
+
+                    const gradient = ctx.createLinearGradient(x, y + canvas.height / 2, x, y + canvas.height / 2 + wave + gridSize);
+                    gradient.addColorStop(0, oceanColor);
+                    gradient.addColorStop(1, foamColor);
+
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                }
+            }
+        }
+
+        loadAnimations();
+
+        window.addEventListener('resize', function () {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Start animation loop
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

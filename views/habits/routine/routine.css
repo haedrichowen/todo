@@ -1,0 +1,554 @@
+html {
+    background-color: rgb(71,69,56,0.9);
+}
+  
+  body {
+    min-width: 720px;
+    border-color: #293122;
+    border-style: outset;
+    margin: 33px 25%;
+    padding: 0;
+  }
+  
+  * {
+    font-family: serif;
+    box-sizing: border-box;
+    transition: height .33s linear;
+  }
+  
+  /* Water-themed animation */
+  @keyframes water {
+    0% {
+      transform: translateY(-2px);
+    }
+    50% {
+      transform: translateY(2px);
+    }
+    100% {
+      transform: translateY(-2px);
+    }
+  }
+  
+  /* Ice-themed animation */
+  @keyframes ice {
+    0% {
+      transform: translateX(-2px) rotate(2deg);
+    }
+    50% {
+      transform: translateX(2px) rotate(-2deg);
+    }
+    100% {
+      transform: translateX(-2px) rotate(2deg);
+    }
+  }
+  
+  .main {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .blank-space {
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 150%;
+  }
+  
+  .breakSelector {
+    font-size: 12px;
+    font-weight: bold;
+    color: #3b392f;
+    border-style: outset;
+    border-color: #333333;
+    background-color: #dadade;
+    border-radius: 2px;
+    line-height: 2;
+    text-align: center;
+    position: absolute;
+    display: inline-block;
+    vertical-align: middle;
+    min-width: 120px;
+    padding: 4px 4px;
+    aspect-ratio: 16/9;
+    user-select: none;
+    z-index: 1;
+  }
+  
+  .breakSelector:hover {
+      bottom: -11%;
+      scale: 101%; /* Make button width equal to its parent width */
+      padding: 10px 20px;
+  }
+  
+  .breakButton {
+      position: absolute;
+      bottom: -15%;
+      scale: 103%;
+      width: 100%; /* Make button width equal to its parent width */
+      padding: 10px 20px; /* Adjust padding as needed */
+      background-color: #5e615f;
+      color: white; /* Button text color */
+      cursor: pointer; /* Change cursor to pointer on hover */
+      z-index: 0;
+  }
+  
+  .note {
+    z-index: 9;
+    background-color: #000e0e;
+  }
+  
+  .note:hover {
+    transform: scale(1.01);
+    transition: background-color 0.5s ease, transform 0.5s ease; /* Add transform to the transition */
+    outline: 2px solid rgb(55, 81, 126, 40); /* Deep powerful and subtle blue */
+  }
+  
+  .note-text:focus {
+    outline: 2px solid #4f4949; 
+  }
+  
+  .note-text:hover {
+    transform: scale(1.03);
+    transition: background-color 0.5s ease, transform 0.5s ease; /* Add transform to the transition */
+  }
+  
+  .note-text {
+    width: 111px;
+    height: 111px;
+  }
+  
+  .move-note {
+    position: absolute;
+    padding: 0;
+    top: -11%;
+    right: 0;
+    width: 100%;
+    height: 11%;
+    min-height: 3px;
+    max-height: 33px;
+    border-style: outset;
+    border-width: 2px;
+    border-color: #aaaaaa;
+    border-radius: 9%;
+    transition: background-color 0.5s ease, transform 0.5s ease; /* Add transform to the transition */
+  }
+  
+  .move-note:hover {
+    background-color: #228dbf;
+    border-color: #11838b;
+    color: white;
+    transform: scale(1.03); /* Scale the element on hover */
+  }
+  
+  .delete-note:hover {
+    background-color: #a4bf22 !important;
+    border-color: #a18b22 !important;
+    color: white !important;
+  }
+  
+  .todo_list {
+    position: static;
+    top: 0;
+    padding: 0;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 720px;
+  }
+  
+  div {
+    position: relative;
+    width: 100%;
+    min-height: 48px;
+  }
+  
+  .input_info {
+    font-size: 12px;
+    min-height: 0px;
+    padding-bottom: 10px;
+    width: 100%;
+  }
+  
+  .options_button {
+    width: 70%;
+    float: right;
+    text-align: right;
+  }
+  
+  /* Remove margins and padding from the list */
+  ol {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    border-style: solid none none none;
+    border-color: #6f6a64;
+    border-width: 6px;
+    align-content: left;
+    list-style-position: inside;
+    list-style-type: upper-roman;
+  }
+  
+  /* Style the list items */
+  li {
+    transition: height 0.33s, background-color 0.33s, color 0.1s;
+    position: relative;
+    padding: 12px 8px;
+    background-color: #55544f;
+    font-size: 18px;
+    color: #eeeeee;
+    border-style: none none solid none;
+    border-color: #1f1919;
+    border-width: 4px;
+    height: 48px;
+  }
+  
+  /* Set all odd list items to a different color (zebra-stripes) */
+  li:nth-child(odd) {
+    background-color: #454340;
+  }
+  
+  /* Darker background-color on hover */
+  li:hover {
+    color: #f8f8f8;
+    background-color: #3d3a36;
+    height: 86px;
+  }
+  
+  .allDone {
+    color: #aaaaaa;
+    background-color: #282524;
+    border-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Align horizontal */
+    margin: auto;
+    padding: 1px;
+  }
+  
+  .takeBreak {
+    line-height: 2;
+    text-align: center;
+    position: absolute;
+    right: 100px;
+    top: 17px;
+    display: inline-block;
+    vertical-align: middle;
+    min-width: 120px;
+    padding: 4px 4px;
+    aspect-ratio: 16/9;
+    user-select: none;
+    z-index: 1;
+  }
+  
+  .breakLength {
+    position: absolute;
+    top: 10%;
+    left: 0%;
+    height: 100%;
+    width: 100%;
+  }
+  
+  @keyframes roundtime {
+    to {
+      /* More performant than animating `width` */
+      transform: scaleX(0);
+    }
+  }
+  
+  .listDiv {
+    background-color: #2c523c;
+    min-height: 720px;
+  }
+  
+  .todoText {
+    position: absolute;
+    left: 72px;
+    width: 256px;
+    display: inline-block;
+  }
+  
+  .todoTimer {
+    position: absolute;
+    right: 60px;
+    margin: 0;
+  }
+  
+  .future {
+    font-size: 10px;
+    width: 56px;
+  }
+  
+  .todoStartTime {
+    font-size: 12px;
+    position: absolute;
+    padding-top: 6px;
+    left: 444px;
+  }
+  
+  .todoInfo {
+    top: 2px;
+    min-height: 32px;
+  }
+  
+  /* Style the close button */
+  .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    max-height: 33px;
+    aspect-ratio: 1;
+    border-style: outset;
+    border-width: 2px;
+    border-color: #aaaaaa;
+    border-radius: 9%;
+  }
+  
+  .finish {
+    background-color: #ff4151 !important;
+    border-color: #ee4151 !important;
+  }
+  
+  .close:hover {
+    background-color: #44bf22;
+    border-color: #118b22;
+    color: white;
+  }
+  
+  .plan_a_day {
+    background-color: #119966;
+    padding: 5px 40px 0px 40px;
+    color: white;
+    text-align: left;
+  }
+  
+  /* Style the input */
+  .todoInput {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    width: 75%;
+    padding: 10px;
+    float: left;
+    font-size: 16px;
+  }
+  
+  button {
+    font-size: 18px;
+    border: none;
+    margin: 0px;
+    height: 100%;
+    padding: 12px;
+  }
+  
+  input[type=radio] {
+    opacity: 0;
+  }
+  
+  .dayButtonDiv {
+    mask-image: linear-gradient(to right, transparent, black 1.2%, black 98.8%, transparent);
+    width: 103%;
+    overflow: auto;
+    position: relative;
+    left: -1.5%;
+    white-space: nowrap;
+    scrollbar-width: none;
+    padding: 6px 0;
+  }
+  
+  /* date and time button styles */
+  .date {
+    min-width: 128px;
+  }
+  
+  .time {
+    border-color: #454251;
+    border-style: outset; 
+    min-width: 96px;
+  }
+  
+  .timeButtonDiv {
+    position: relative;
+    left: -14px;
+    mask-image: linear-gradient(to right, transparent, black 2%, black 98%, transparent);
+    width: 66%;
+    margin: auto;
+    position: relative;
+    text-align: center;
+    overflow: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    padding: 6px 0;
+  }
+  
+  /* Style the "Add" button */
+  .addButton {
+    padding: 10px;
+    width: 25%;
+    background: #d9d9d9;
+    color: #555;
+    float: left;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 0;
+  }
+  
+  .addButton:hover {
+    background-color: #bbb;
+  }
+  
+  .headerButton {
+    color: #fffeff;
+    font-weight: bold;
+    background-color: #119966;
+    position: relative;
+    left: -16px;
+    text-align: center;
+    padding: 24px 8px 0;
+  }
+  
+  .floatingLeft {
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    outline-style: outset;
+    outline-color: #272233;
+    border-radius: 1px;
+    color: #e7e2dc;
+    background-color: #333333;
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-60%);
+    padding: 1%;
+    margin: 0;
+    vertical-align: middle;
+  }
+  
+  .floatingRight {
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    outline-style: outset;
+    outline-color: #272233;
+    border-radius: 1px;
+    color: #e7e2dc;
+    background-color: #333333;
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    transform: translateY(-30%);
+    padding: 1%;
+    margin: 0;
+    vertical-align: middle;
+  }
+  
+  .verticalSpace {
+    min-height: 0;
+    background-color: #119966;
+    padding: 8px;
+    z-index: -1;
+  }
+  
+  .toggled {
+    background-color: #dbd4aa;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  .invisibleButton {
+    user-select: none;
+    position: absolute;
+    bottom: 0;
+    height: 50%;
+    width: 50%;
+  }
+  
+  .left {
+    left: 0%;
+  }
+  
+  .right {
+    right: 0%;
+  }
+  
+  .top {
+    left: 0%;
+    width: 100%;
+    top: 0%;
+  }
+  
+  .right {
+    right: 0%;
+  }
+  
+  hr {
+    position: relative;
+    top: 8px;
+    color: #ddddee;
+  }
+  
+  p {
+    text-align: right;
+    font-size: 14px;
+    margin: 0px;
+    padding: 0px;
+  }
+  
+  details {
+    padding: 0px 12px 0px 12px;
+  }
+  
+  summary {
+    list-style: none;
+  }
+  
+  /* Style the header */
+  h2 {
+    margin: 0;
+  }
+  
+  h3 {
+    position: relative;
+    left: -16px;
+  }
+  
+  .header {
+    background-color: #119966;
+    padding: 32px 40px 0px 40px;
+    color: white;
+    text-align: center;
+  }
+  
+  .header_redirect {
+    background-color: #119966;
+    padding: 0px 40px 0px 40px;
+    color: white;
+    text-align: center;
+  }
+  
+          .menu button {
+                display: block;
+                  width: 100%;
+                    padding: 10px;
+                      margin-bottom: 10px;
+                    background-color: #555;
+                      color: #fff;
+                        border: none;
+                          cursor: pointer;
+                  }
+  
+                  .menu button:hover {
+                        background-color: #777;
+                    }
+  
+  

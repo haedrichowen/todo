@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+
+<html>
+
+    <meta name="color-scheme" content="light only">
+    <link rel="stylesheet" type="text/css" href="routine.css"></link>
+
+    <head>
+
+<script>
+        function buttonHold(element, action_function, hold_time_ms) {
+                const test_execute = function() { if (element.matches(':hover')){ action_function(); }};
+                setTimeout(test_execute, hold_time_ms)
+        }
+        function hoverHold(element, action_function, hold_time_ms) {
+                const test_execute = function() { if (element.matches(':hover')){ action_function(); }};
+                setTimeout(test_execute, hold_time_ms)
+        }
+</script>
+<script>
+    // Function to smoothly scroll to 5% of the top
+    function smoothScrollTo5Percent() {
+        window.scroll({
+            top: window.innerHeight * 0.05, // 5% of the viewport height
+            behavior: 'smooth' // Smooth scrolling
+        });
+    }
+
+    // Check if scroll position is within 15% of the top
+    window.addEventListener('DOMContentLoaded', function() {
+        var scrollPosition = window.scrollY;
+        var windowHeight = window.innerHeight;
+        var percentOfWindow = windowHeight * 0.25;
+
+        if (scrollPosition < percentOfWindow) {
+            // Call smooth scroll function
+            smoothScrollTo5Percent();
+        }
+    });
+function postToBlockLength(newBlValue) {
+  const url = `/blockLength/${newBlValue}`;
+  fetch(url, {
+    method: 'POST',
+  }).then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    // Handle success
+    console.log('Blocks saved successfully');
+;})
+.catch(error => {
+    // Handle errors
+    console.error('Error saving blocks:', error);
+});
+}
+</script>
+<script>
+// Function to save notes to server
+function saveNotes() {
+// Select all elements with class 'note'
+    var noteElements = document.querySelectorAll('.note');
+
+    // Create a container element to hold all the notes
+    var container = document.createElement('div');
+
+    // Iterate through each note element and append it to the container
+    Array.from(noteElements).forEach(function(noteElement) {
+        // Clone the note element
+        var clonedNote = noteElement.cloneNode(true);
+
+        // Get the computed style of the note element
+        var computedStyle = window.getComputedStyle(noteElement);
+
+        // Create a style element and set its content to the computed style
+        var styleElement = document.createElement('style');
+        styleElement.innerHTML = '.note { ' + computedStyle.cssText + ' }';
+
+        // Append the cloned note and style element to the container
+        container.appendChild(styleElement);
+        container.appendChild(clonedNote);
+    });
+
+    // Get the HTML content of the container
+    var notesHTML = encodeURIComponent(container.innerHTML);console.log("saving notes: " + notesHTML);
+
+// Send data to server
+fetch('/saveNotes', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'text/html' // Set the content type to text/html
+    },
+    body: notesHTML
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    // Handle success
+    console.log('Notes saved successfully');
+})
+.catch(error => {
+    // Handle errors
+    console.error('Error saving notes:', error);
+});
+}
+
+</script>
+
+
+</head>
+    <body>
+        <div class="routine_list">
+            <form class='header_redirect' action="/" method="GET">
+                <button class="header">
+                    <h2> routines </h2>
+                </button>
+            </form>	
+            <div class='verticalSpace'></div>
+            <div class="routineDiv">
+                <form action="/add/routine" method="POST">
+                <div>
+                   <input type="hidden" id="routineLength" name="length" value="<%= block_length %>">
+                   <input type="text" class="routineInput" name="text" placeholder="Start a daily habit..." required>
+                   <input type="hidden" id="routineStarttime" name="starttime" value="0"> <!-- value = minutes_from_now -->
+                   <button type="submit" class="startButton">Start</button>
+                </div>
+            </div>
+            <div class='listDiv'>
+<ol>
+    <% for(var i=0; i<Object.keys(routine_array).length; i++) { %>
+        <li>
+            <span class="routineText <%= routine_array[i].id %>"></span> <%= routine_array[i].routine %>          
+            <form action="/remove/routine/<%= i+1 %>" method="POST">
+                <button id="close_button<%= i+1 %>" class="close"></button>
+            </form>
+            <div class="routine<%= routine_array[i].id %> routineInfo"></div>
+        </li>
+    <% } %>
+</ol>
+            </div>
+        </div>
+        <div id="notes-container" class="behind-all" onclick="spawnTextBox(event)">
+              <!-- This is the area where the user can click to spawn a text box -->
+        </div>  
+
+  <script>
+        function toggleClass(toggleclass) {
+            var toToggle = $('.' + toggleclass);
+                toToggle.each(function( index ) {
+                if ($(this).hasClass('hidden')) {
+                    $(this).removeClass('hidden');
+                } else {
+                    $(this).addClass('hidden');
+                }
+            });
+        }
+        </script>
+    </body>
+</html>
+
